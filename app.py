@@ -49,7 +49,7 @@ def toggle_availability():
     book_name = request.form['book_name']
     new_availability = request.form['new_availability']
     
-    for book in books:
+    for book in books: 
         if book['name'] == book_name:
             book['availability'] = new_availability
             break
