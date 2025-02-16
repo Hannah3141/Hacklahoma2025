@@ -5,8 +5,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
+import requests
+import json
+from bs4 import BeautifulSoup
 
-def get_library_statuses(url):
+def get_library_statuses(title):
     # Set up Edge options
     edge_options = EdgeOptions()
     edge_options.add_argument("--headless")  # Run in headless mode
@@ -15,9 +18,19 @@ def get_library_statuses(url):
     service = EdgeService(EdgeChromiumDriverManager().install())
     driver = webdriver.Edge(service=service, options=edge_options)
 
-    try:
-        # Load the page
-        driver.get(url)
+    response = requests.get(
+        f"https://tccl.bibliocommons.com/v2/search?query={title[0]}&searchType=title"
+    )
+    soup = BeautifulSoup(response.text, 'html.parser')
+    first_result = soup.find('div', class_='cp-search-result-item-content')
+    if first_result == None:
+        return False
+    title_elem = first_result.find('span', class_='title-content')
+    magic_number = first_result.find('a', attrs={'data-key': 'bib-title'})['data-test-id'][10:]
+    
+    if title_elem.contents == title: #if in system
+    # Load the page
+        driver.get(f"https://tccl.bibliocommons.com/v2/availability/{magic_number}")
 
         # Wait for the table to be present
         table = WebDriverWait(driver, 10).until(
@@ -34,13 +47,13 @@ def get_library_statuses(url):
                 library = cells[0].text.split('\n')[-1]
                 status = cells[3].text.split('\n')[-1]
                 library_status[library] = status
-
+        
+        driver.quit()
+        
         return library_status
 
-    finally:
-        driver.quit()
-
 # Usage
-url = "https://tccl.bibliocommons.com/v2/availability/S63C1803693"
-results = get_library_statuses(url)
+#url = "https://tccl.bibliocommons.com/v2/availability/S63C1803693"
+titles = ['To Kill A Mockingbird']
+results = get_library_statuses(titles)
 print(results)
