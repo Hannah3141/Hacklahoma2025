@@ -36,13 +36,20 @@
         </thead>
         <tbody id="book-table-body">
             {% for book in books %}
-                <tr>
+                <tr id="book-{{ loop.index }}">
                     <td>{{ book['name'] }}</td>
                     <td>{{ book['genre'] }}</td>
                     <td>{{ book['availability'] }}</td>
+                    <td>
+                        <!-- Mark as Read Button -->
+                        <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
+                        <!-- Delete Button -->
+                        <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
+        
     </table>
 </div>
 
@@ -64,11 +71,15 @@ $(document).ready(function() {
                 genre: genre
             },
             success: function(response) {
-                // Append the new book to the table
-                let newRow = `<tr>
+                // Append the new book to the table with buttons
+                let newRow = `<tr id="book-${response.name}">
                     <td>${response.name}</td>
                     <td>${response.genre}</td>
                     <td>${response.availability}</td>
+                    <td>
+                        <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
+                        <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                    </td>
                 </tr>`;
                 $('#book-table-body').append(newRow);
 
@@ -78,6 +89,64 @@ $(document).ready(function() {
             },
             error: function() {
                 alert("There was an error adding the book.");
+            }
+        });
+    });
+
+    // Handle the Mark as Read button
+    $(document).on('click', '.mark-read-btn', function() {
+        let bookName = $(this).closest('tr').find('td').first().text();
+        let row = $(this).closest('tr');
+        
+        // Apply strikethrough and change row background color to gray
+        row.css({
+            'text-decoration': 'line-through',  // Add strikethrough
+            'color': 'gray',                    // Change text color to gray
+            'background-color': '#f2f2f2'       // Set background to light gray
+        });
+
+        // Change button text to "Move Back to List"
+        $(this).text('Move Back to List').removeClass('btn-success').addClass('btn-warning');
+
+        // Append the row to the bottom of the list
+        $('#book-table-body').append(row);
+    });
+
+    // Handle the Move Back to List button
+    $(document).on('click', '.mark-read-btn.btn-warning', function() {
+        let bookName = $(this).closest('tr').find('td').first().text();
+        let row = $(this).closest('tr');
+        
+        // Remove strikethrough, restore row color, and reset background color
+        row.css({
+            'text-decoration': 'none',         // Remove strikethrough
+            'color': 'black',                  // Restore text color
+            'background-color': 'white'        // Remove gray background
+        });
+
+        // Change button text back to "Mark as Read"
+        $(this).text('Mark as Read').removeClass('btn-warning').addClass('btn-success');
+
+        // Move the row back to the top (first position in the list)
+        $('#book-table-body').prepend(row);
+    });
+
+    // Handle the Delete button
+    $(document).on('click', '.delete-btn', function() {
+        let bookName = $(this).closest('tr').find('td').first().text();
+
+        $.ajax({
+            type: 'POST',
+            url: '/delete_book',
+            data: {
+                book_name: bookName
+            },
+            success: function(response) {
+                // Remove the book from the table
+                $(`#book-${bookName}`).remove();
+            },
+            error: function() {
+                alert("There was an error deleting the book.");
             }
         });
     });
