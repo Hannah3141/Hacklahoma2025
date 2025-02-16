@@ -25,6 +25,11 @@
     </form>
 
     <hr>
+
+    <div class="mb-3">
+        <button id="sort-alphabetically" class="btn btn-info">Sort Alphabetically</button>
+    </div>
+    
     <!-- Book Table -->
     <table class="table table-bordered mt-4">
         <thead>
@@ -95,14 +100,13 @@ $(document).ready(function() {
 
     // Handle the Mark as Read button
     $(document).on('click', '.mark-read-btn', function() {
-        let bookName = $(this).closest('tr').find('td').first().text();
         let row = $(this).closest('tr');
         
-        // Apply strikethrough and change row background color to gray
-        row.css({
-            'text-decoration': 'line-through',  // Add strikethrough
-            'color': 'gray',                    // Change text color to gray
-            'background-color': '#f2f2f2'       // Set background to light gray
+        // Add 'read-book' class and apply styles
+        row.addClass('read-book').css({
+            'text-decoration': 'line-through',
+            'color': 'gray',
+            'background-color': '#f2f2f2'
         });
 
         // Change button text to "Move Back to List"
@@ -114,14 +118,13 @@ $(document).ready(function() {
 
     // Handle the Move Back to List button
     $(document).on('click', '.mark-read-btn.btn-warning', function() {
-        let bookName = $(this).closest('tr').find('td').first().text();
         let row = $(this).closest('tr');
         
-        // Remove strikethrough, restore row color, and reset background color
-        row.css({
-            'text-decoration': 'none',         // Remove strikethrough
-            'color': 'black',                  // Restore text color
-            'background-color': 'white'        // Remove gray background
+        // Remove 'read-book' class and reset styles
+        row.removeClass('read-book').css({
+            'text-decoration': 'none',
+            'color': 'black',
+            'background-color': 'white'
         });
 
         // Change button text back to "Mark as Read"
@@ -130,6 +133,7 @@ $(document).ready(function() {
         // Move the row back to the top (first position in the list)
         $('#book-table-body').prepend(row);
     });
+
 
     // Handle the Delete button
     $(document).on('click', '.delete-btn', function() {
@@ -170,6 +174,38 @@ $(document).ready(function() {
             }
         });
     });
+
+    // Handle the Sort Alphabetically button
+    $('#sort-alphabetically').click(function() {
+        let rows = $('#book-table-body tr').get();
+        
+        // Separate read and unread books
+        let unreadBooks = rows.filter(row => !$(row).hasClass('read-book'));
+        let readBooks = rows.filter(row => $(row).hasClass('read-book'));
+        
+        // Sort function for alphabetical order
+        function alphabeticalSort(a, b) {
+            let titleA = $(a).find('td').first().text().toLowerCase();
+            let titleB = $(b).find('td').first().text().toLowerCase();
+            return titleA.localeCompare(titleB);
+        }
+        
+        // Sort each group alphabetically
+        unreadBooks.sort(alphabeticalSort);
+        readBooks.sort(alphabeticalSort);
+        
+        // Combine the sorted groups, with unread books on top
+        let sortedRows = unreadBooks.concat(readBooks);
+        
+        // Reappend the sorted rows to the table
+        $('#book-table-body').empty();
+        $.each(sortedRows, function(index, row) {
+            $('#book-table-body').append(row);
+        });
+    });
+
+
+
 });
 </script>
 
