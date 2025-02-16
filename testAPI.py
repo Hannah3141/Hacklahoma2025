@@ -1,14 +1,15 @@
 import requests
 import json
 
-def get_weather(latitude: float, longitude: float):
+def get_book(title):
     response = requests.get(
-        f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m"
+        f"http://opl.bibliocommons.com/search?query={title}&searchType=title"
     )
-    data = response.json()
-    return data["current"]
+    #data = response.json()
+    return response
 
-results = get_weather(52.52, 13.41)
+results = get_book("The Worlds I See")
+
 #wResults = results.read()
 #wjResults = json.loads(results)
 print(results)
