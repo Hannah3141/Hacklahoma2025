@@ -212,6 +212,7 @@ $(document).ready(function () {
             error: function () {
                 // Hide the loading spinner on error
                 $('#loading-spinner').hide();
+                $('button[type=submit]').prop('disabled', false);
 
                 let name = bookName;
                 let author = "Unknown";
