@@ -19,7 +19,7 @@ driver = webdriver.Edge(service=service, options=edge_options)
 
 def get_library_statuses(title):
     response = requests.get(
-        f"https://tccl.bibliocommons.com/v2/search?query={title[0]}&searchType=title"
+        f"https://tccl.bibliocommons.com/v2/search?query={title[0]}&searchType=title&f_FORMAT=BK"
     )
     soup = BeautifulSoup(response.text, 'html.parser')
     first_result = soup.find('div', class_='cp-search-result-item-content')
@@ -56,10 +56,10 @@ def get_library_statuses(title):
 
 def get_utulsa_statuses(title):
     response = requests.get(
-        f"https://tccl.bibliocommons.com/v2/search?query={title[0]}&searchType=title"
+        f"https://universityoftulsa.on.worldcat.org/search?queryString=ti{title[0]}"
     )
     soup = BeautifulSoup(response.text, 'html.parser')
-    first_result = soup.find('div', class_='cp-search-result-item-content')
+    '''first_result = soup.find('div', class_='cp-search-result-item-content')
     if first_result == None:
         return False
     title_elem = first_result.find('span', class_='title-content')
@@ -88,6 +88,7 @@ def get_utulsa_statuses(title):
         driver.quit()
         
         return library_status
+        '''
 
 # Usage
 #url = "https://tccl.bibliocommons.com/v2/availability/S63C1803693"

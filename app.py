@@ -11,7 +11,7 @@ books = []
 # Route to get book availability
 @app.route('/toggle_availability', methods=['POST'])
 def fetch_book_availability(book_name):
-    url = f"https://tccl.bibliocommons.com/v2/search?query={book_name}&searchType=smart"
+    url = f"https://tccl.bibliocommons.com/v2/search?query={book_name}&searchType=smart&f_FORMAT=BK"
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
     
@@ -41,11 +41,13 @@ def add_book():
     book_name = request.form['book_name']
     
     book_info = fetch_book_availability(book_name)
+    available_list = successfulScraper.get_library_statuses(book_name)
     
     new_book = {
         'name': book_info['title'],
         'author': book_info['author'],
-        'availability': book_info['availability']
+        'available_list': available_list,
+        #'availability': book_info['availability']
     }
     books.append(new_book)
     return jsonify(new_book)
