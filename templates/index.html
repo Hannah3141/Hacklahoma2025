@@ -32,6 +32,7 @@
                 <th>Book Name</th>
                 <th>Genre</th>
                 <th>Availability</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody id="book-table-body">
@@ -41,10 +42,9 @@
                     <td>{{ book['genre'] }}</td>
                     <td>{{ book['availability'] }}</td>
                     <td>
-                        <!-- Mark as Read Button -->
                         <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
-                        <!-- Delete Button -->
                         <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                        <button class="btn btn-warning btn-sm toggle-availability-btn">Toggle Availability</button>
                     </td>
                 </tr>
             {% endfor %}
@@ -71,7 +71,6 @@ $(document).ready(function() {
                 genre: genre
             },
             success: function(response) {
-                // Append the new book to the table with buttons
                 let newRow = `<tr id="book-${response.name}">
                     <td>${response.name}</td>
                     <td>${response.genre}</td>
@@ -79,6 +78,7 @@ $(document).ready(function() {
                     <td>
                         <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
                         <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                        <button class="btn btn-warning btn-sm toggle-availability-btn">Toggle Availability</button>
                     </td>
                 </tr>`;
                 $('#book-table-body').append(newRow);
@@ -147,6 +147,26 @@ $(document).ready(function() {
             },
             error: function() {
                 alert("There was an error deleting the book.");
+            }
+        });
+    });
+
+    // Handle the Toggle Availability button
+    $(document).on('click', '.toggle-availability-btn', function() {
+        let row = $(this).closest('tr');
+        let bookName = row.find('td').first().text();
+        let availability = row.find('td').eq(2).text();
+        let newAvailability = (availability === 'Available') ? 'Unavailable' : 'Available';
+        
+        $.ajax({
+            type: 'POST',
+            url: '/toggle_availability',
+            data: { book_name: bookName, new_availability: newAvailability },
+            success: function(response) {
+                row.find('td').eq(2).text(newAvailability);
+            },
+            error: function() {
+                alert("There was an error updating availability.");
             }
         });
     });
