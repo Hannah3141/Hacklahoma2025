@@ -17,7 +17,7 @@ driver = webdriver.Edge(service=service, options=edge_options)
 
 def get_utulsa_statuses(title):
     # Load the page
-    driver.get(f"https://universityoftulsa.on.worldcat.org/search?queryString=ti:({title[0]})")
+    driver.get(f"https://universityoftulsa.on.worldcat.org/search?queryString=bn:(0397001517)&subformat=Book%3A%3Abook_printbook")
 
     # Wait for the table to be present
     box_element = WebDriverWait(driver, 20).until(
@@ -25,12 +25,19 @@ def get_utulsa_statuses(title):
     )
     try:
         first_element = box_element.find_element(By.CSS_SELECTOR, "li[data-testid='record-0']")
+        print(first_element)
     except NoSuchElementException:
+        return "No results found"
+    except IndexError:
         return "No results found"
     try:
         #title_element = first_element.find_element(By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-h6.MuiTypography-alignLeft.jss229.cssltr-k1mv2p")
         title_element = first_element.find_element(By.CSS_SELECTOR, "span[data-testid='highlighted-term-container']")
-        print(title_element.text)
+        if title_element.text == title:
+            print(title_element.text)
+            return True
+        else:
+            return title_element.text
     except NoSuchElementException:
         print("No such title element")
 
@@ -41,4 +48,4 @@ def get_utulsa_statuses(title):
 
     return library_status
 '''
-get_utulsa_statuses("The Worlds I See")
+print(get_utulsa_statuses("Little Women"))
