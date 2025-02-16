@@ -110,6 +110,11 @@
                 <input type="text" class="form-control" id="book_name" required>
             </div>
             <button type="submit" class="btn btn-primary">Add Book</button>
+            <div id="loading-spinner" style="display: none; text-align: center; margin-top: 10px;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
         </form>
 
         <hr>
@@ -160,42 +165,51 @@
 </div>
 
 <script>
-$(document).ready(function() {
-    $('#add-book-form').submit(function(e) {
-    e.preventDefault();
-    let bookName = $('#book_name').val();
-    $.ajax({
-        type: 'POST',
-        url: '/add_book',
-        data: { book_name: bookName },
-        success: function(response) {
-            let availabilityHtml = '';
-            if (response.availability) {
-                availabilityHtml = '<ul>';
-                for (let [library, status] of Object.entries(response.availability)) {
-                    availabilityHtml += `<li>${library}: ${status}</li>`;
+$(document).ready(function () {
+    $('#add-book-form').submit(function (e) {
+        e.preventDefault();
+
+        // Show the loading spinner
+        $('#loading-spinner').show();
+
+        let bookName = $('#book_name').val();
+        $.ajax({
+            type: 'POST',
+            url: '/add_book',
+            data: { book_name: bookName },
+            success: function (response) {
+                // Hide the loading spinner
+                $('#loading-spinner').hide();
+
+                let availabilityHtml = '';
+                if (response.availability) {
+                    availabilityHtml = '<ul>';
+                    for (let [library, status] of Object.entries(response.availability)) {
+                        availabilityHtml += `<li>${library}: ${status}</li>`;
+                    }
+                    availabilityHtml += '</ul>';
+                } else {
+                    availabilityHtml = 'Not available';
                 }
-                availabilityHtml += '</ul>';
-            } else {
-                availabilityHtml = 'Not available';
-            }
-            let newRow = `<tr id="book-${response.name}">
-                <td>${response.name}</td>
-                <td>${response.author}</td>
-                <td>${availabilityHtml}</td>
-                <td>
-                    <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
-                    <button class="btn btn-danger btn-sm delete-btn">Delete</button>
-                </td>
-            </tr>`;
-            $('#book-table-body').append(newRow);
-            $('#book_name').val('');
-        },
 
-
-        error: function() {
-            alert("There was an error adding the book.");
-        }
+                let newRow = `<tr id="book-${response.name}">
+                    <td>${response.name}</td>
+                    <td>${response.author}</td>
+                    <td>${availabilityHtml}</td>
+                    <td>
+                        <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
+                        <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                    </td>
+                </tr>`;
+                $('#book-table-body').append(newRow);
+                $('#book_name').val('');
+            },
+            error: function () {
+                // Hide the loading spinner on error
+                $('#loading-spinner').hide();
+                alert('There was an error adding the book.');
+            },
+        });
     });
 });
 
@@ -221,8 +235,6 @@ $(document).on('click', '.delete-btn', function() {
     });
 });
 
-    // ... (rest of your JavaScript code remains the same)
-});
 
 // Handle the Mark as Read button
 $(document).on('click', '.mark-read-btn', function() {

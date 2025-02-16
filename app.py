@@ -40,7 +40,6 @@ def add_book():
     book_name = request.form['book_name']
     book_info = fetch_book_availability()
     available_list = successfulScraper.get_library_statuses(book_name)
-    print("LELELELELELE", available_list)
 
     new_book = {
         'name': book_info['title'],
