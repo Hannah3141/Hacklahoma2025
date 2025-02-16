@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tulsa Library Book Search</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Tulsa Library Book Search</h1>
+    <form id="book-form">
+        <input type="text" id="book-name" placeholder="Book Name" required>
+        <input type="text" id="genre" placeholder="Genre" required>
+        <button type="submit">Add Book</button>
+    </form>
+    <ul id="book-list"></ul>
+
+    <script>
+        $(document).ready(function() {
+            $('#book-form').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/add_book',
+                    method: 'POST',
+                    data: {
+                        book_name: $('#book-name').val(),
+                        genre: $('#genre').val()
+                    },
+                    success: function(response) {
+                        $('#book-list').append('<li>' + response.name + ' by ' + response.author + ' - ' + response.genre + ' - ' + response.availability + '</li>');
+                        $('#book-name').val('');
+                        $('#genre').val('');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

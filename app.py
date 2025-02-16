@@ -1,23 +1,9 @@
 from flask import Flask, render_template, request, jsonify
-import requests
-from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
 # Sample data: Temporary list for books and their availability
 books = []
-
-# Function to check availability (using your scraping logic)
-def fetch_book_availability(book_name):
-    # Example scraping logic for a specific library website
-    url = f"http://example-library-website.com/search?query={book_name}"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    
-    # For simplicity, let's assume the availability info is within <div class='status'>
-    status = soup.find('div', class_='status').text.strip()
-    
-    return status
 
 # Route to display the reading list
 @app.route('/')
@@ -47,6 +33,29 @@ def add_book():
     # Return the new book as a JSON response
     return jsonify(new_book)
 
+# Route to delete a book
+@app.route('/delete_book', methods=['POST'])
+def delete_book():
+    book_name = request.form['book_name']
+    
+    # Find and remove the book from the list
+    global books
+    books = [book for book in books if book['name'] != book_name]
+
+    return jsonify({'status': 'deleted', 'book_name': book_name})
+
+# Route to mark a book as read
+@app.route('/mark_read', methods=['POST'])
+def mark_read():
+    book_name = request.form['book_name']
+    
+    # Find the book and update its availability
+    for book in books:
+        if book['name'] == book_name:
+            book['availability'] = "Read"
+            break
+
+    return jsonify({'status': 'marked', 'book_name': book_name, 'availability': "Read"})
 
 if __name__ == '__main__':
     app.run(debug=True)
