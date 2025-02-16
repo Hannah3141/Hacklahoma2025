@@ -47,12 +47,6 @@ def add_book():
         'author': book_info['author'],
         'availability': book_info['availability']
     }
-    
-    genre = request.form['genre']
-    availability_list = successfulScraper.get_library_statuses(book_name)
-    availability = availability_list[0]
-
-    new_book = {'name': book_name, 'genre': genre, 'availability': availability}
     books.append(new_book)
     return jsonify(new_book)
 
@@ -76,19 +70,6 @@ def mark_read():
             break
 
     return jsonify({'status': 'marked', 'book_name': book_name, 'availability': "Read"})
-
-# Route to toggle book availability -- TODO: delete
-@app.route('/toggle_availability', methods=['POST'])
-def toggle_availability():
-    book_name = request.form['book_name']
-    new_availability = request.form['new_availability']
-    
-    for book in books: 
-        if book['name'] == book_name:
-            book['availability'] = new_availability
-            break
-
-    return jsonify({'status': 'updated', 'book_name': book_name, 'availability': new_availability})
 
 if __name__ == '__main__':
     app.run(debug=True)
