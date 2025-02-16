@@ -41,7 +41,7 @@ def add_book():
         'availability': availability
     }
 
-    # Add the book to the list
+    # Add the book to the list 
     books.append(new_book)
 
     # Return the new book as a JSON response
