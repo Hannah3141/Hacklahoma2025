@@ -1,0 +1,85 @@
+Todo:
+    add confetti for button press
+    resize gif
+    font styling
+    style cells
+    add colors
+    other interactions?
+    maybe floating background
+    try copying cute bird on hacklahoma website
+
+    import google.generativeai as genai
+
+# Configure the Gemini API
+genai.configure(api_key='AIzaSyCJhZA-00AjixPDrf3DZ3MYLg1H1VLSUqg')
+
+# Initialize the model
+model = genai.GenerativeModel('gemini-1.5-flash')
+
+def get_book_recommendations(user_books):
+    prompt = f"Based on the following books: {user_books}, recommend 3 similar books with their titles and authors."
+    response = model.generate_content(prompt)
+    return response.text
+
+# Example usage
+user_books = "To Kill a Mockingbird, Where the Sidewalk Ends, The Hobbit"
+recommendations = get_book_recommendations(user_prefs)
+print(recommendations)
+
+
+AIzaSyCJhZA-00AjixPDrf3DZ3MYLg1H1VLSUqg
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Recommendations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Book Recommendations</h1>
+    <form id="bookForm">
+        <label for="userBooks">Enter books you've read (comma-separated):</label><br>
+        <textarea id="userBooks" rows="4" cols="50"></textarea><br>
+        <button type="submit">Get Recommendations</button>
+    </form>
+    <div id="output"></div>
+
+    <script>
+        document.getElementById('bookForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const userBooks = document.getElementById('userBooks').value;
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = 'Loading...';
+
+            try {
+                const response = await fetch('/get_recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_books: userBooks }),
+                });
+                const data = await response.text();
+                outputDiv.innerHTML = data.replace(/\n/g, '<br>');
+            } catch (error) {
+                outputDiv.innerHTML = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Recommendations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Book Recommendations</h1>
+    <form id="bookForm">
+        <label for="userBooks">Enter books you've read (comma-separated):</label><br>
+        <textarea id="userBooks" rows="4" cols="50"></textarea><br>
+        <button type="submit">Get Recommendations</button>
+    </form>
+    <div id="output"></div>
+
+    <script>
+        document.getElementById('bookForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const userBooks = document.getElementById('userBooks').value;
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = 'Loading...';
+
+            try {
+                const response = await fetch('/get_recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_books: userBooks }),
+                });
+                const data = await response.text();
+                outputDiv.innerHTML = data.replace(/\n/g, '<br>');
+            } catch (error) {
+                outputDiv.innerHTML = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
