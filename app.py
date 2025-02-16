@@ -13,32 +13,19 @@ def index():
 # Route to add a new book
 @app.route('/add_book', methods=['POST'])
 def add_book():
-    # Get data from the form
     book_name = request.form['book_name']
     genre = request.form['genre']
+    availability = "Available"
 
-    # Set a placeholder availability value for now
-    availability = "Available"  # Placeholder value for now
-
-    # Create a new book dictionary
-    new_book = {
-        'name': book_name,
-        'genre': genre,
-        'availability': availability
-    }
-
-    # Add the book to the list 
+    new_book = {'name': book_name, 'genre': genre, 'availability': availability}
     books.append(new_book)
 
-    # Return the new book as a JSON response
     return jsonify(new_book)
 
 # Route to delete a book
 @app.route('/delete_book', methods=['POST'])
 def delete_book():
     book_name = request.form['book_name']
-    
-    # Find and remove the book from the list
     global books
     books = [book for book in books if book['name'] != book_name]
 
@@ -49,13 +36,25 @@ def delete_book():
 def mark_read():
     book_name = request.form['book_name']
     
-    # Find the book and update its availability
     for book in books:
         if book['name'] == book_name:
             book['availability'] = "Read"
             break
 
     return jsonify({'status': 'marked', 'book_name': book_name, 'availability': "Read"})
+
+# Route to toggle book availability
+@app.route('/toggle_availability', methods=['POST'])
+def toggle_availability():
+    book_name = request.form['book_name']
+    new_availability = request.form['new_availability']
+    
+    for book in books: 
+        if book['name'] == book_name:
+            book['availability'] = new_availability
+            break
+
+    return jsonify({'status': 'updated', 'book_name': book_name, 'availability': new_availability})
 
 if __name__ == '__main__':
     app.run(debug=True)
