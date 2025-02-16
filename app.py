@@ -1,9 +1,33 @@
 from flask import Flask, render_template, request, jsonify
+import requests
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
 # Sample data: Temporary list for books and their availability
 books = []
+
+# Route to get book availability
+@app.route('/toggle_availability', methods=['POST'])
+def fetch_book_availability(book_name):
+    url = f"https://tccl.bibliocommons.com/v2/search?query={book_name}&searchType=smart"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    first_result = soup.find('div', class_='cp-search-result-item-content')
+    
+    if first_result:
+        title_elem = first_result.find('span', class_='title-content')
+        author_elem = first_result.find('a', class_='author-link')
+        availability_elem = first_result.find('span', class_='cp-availability-status')
+
+        title = title_elem.text.strip() if title_elem else "Title not found"
+        author = author_elem.text.strip() if author_elem else "Author not found"
+        availability = availability_elem.text.strip() if availability_elem else "Availability information not found"
+
+        return {"title": title, "author": author, "availability": availability}
+    else:
+        return {"title": "Book not found", "author": "N/A", "availability": "N/A"}
 
 # Route to display the reading list
 @app.route('/')
@@ -14,12 +38,16 @@ def index():
 @app.route('/add_book', methods=['POST'])
 def add_book():
     book_name = request.form['book_name']
-    genre = request.form['genre']
-    availability = "Available"
-
-    new_book = {'name': book_name, 'genre': genre, 'availability': availability}
+    
+    book_info = fetch_book_availability(book_name)
+    
+    new_book = {
+        'name': book_info['title'],
+        'author': book_info['author'],
+        'availability': book_info['availability']
+    }
+    
     books.append(new_book)
-
     return jsonify(new_book)
 
 # Route to delete a book
@@ -42,19 +70,6 @@ def mark_read():
             break
 
     return jsonify({'status': 'marked', 'book_name': book_name, 'availability': "Read"})
-
-# Route to toggle book availability
-@app.route('/toggle_availability', methods=['POST'])
-def toggle_availability():
-    book_name = request.form['book_name']
-    new_availability = request.form['new_availability']
-    
-    for book in books: 
-        if book['name'] == book_name:
-            book['availability'] = new_availability
-            break
-
-    return jsonify({'status': 'updated', 'book_name': book_name, 'availability': new_availability})
 
 if __name__ == '__main__':
     app.run(debug=True)
