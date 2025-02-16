@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+import successfulScraper
 
 app = Flask(__name__)
 
@@ -15,7 +16,8 @@ def index():
 def add_book():
     book_name = request.form['book_name']
     genre = request.form['genre']
-    availability = "Available"
+    availability_list = successfulScraper.get_library_statuses(book_name)
+    availability = availability_list[0]
 
     new_book = {'name': book_name, 'genre': genre, 'availability': availability}
     books.append(new_book)
@@ -43,7 +45,7 @@ def mark_read():
 
     return jsonify({'status': 'marked', 'book_name': book_name, 'availability': "Read"})
 
-# Route to toggle book availability
+# Route to toggle book availability -- TODO: delete
 @app.route('/toggle_availability', methods=['POST'])
 def toggle_availability():
     book_name = request.form['book_name']
