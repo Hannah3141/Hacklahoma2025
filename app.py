@@ -3,6 +3,7 @@ import requests
 #from google import generativeai as genai
 import os
 from bs4 import BeautifulSoup
+import successfulScraper
 
 app = Flask(__name__)
 
@@ -18,7 +19,7 @@ books = []
 # Route to get book availability
 @app.route('/toggle_availability', methods=['POST'])
 def fetch_book_availability(book_name):
-    url = f"https://tccl.bibliocommons.com/v2/search?query={book_name}&searchType=smart"
+    url = f"https://tccl.bibliocommons.com/v2/search?query={book_name}&searchType=smart&f_FORMAT=BK"
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
     
@@ -35,7 +36,8 @@ def fetch_book_availability(book_name):
 
         return {"title": title, "author": author, "availability": availability}
     else:
-        return {"title": "Book not found", "author": "N/A", "availability": "N/A"}
+        availability = "N/A"
+        return {"title": book_name, "author": "Unknown", "availability": availability}
 
 # Route to display the reading list
 @app.route('/')
@@ -48,13 +50,14 @@ def add_book():
     book_name = request.form['book_name']
     
     book_info = fetch_book_availability(book_name)
+    available_list = successfulScraper.get_library_statuses(book_name)
     
     new_book = {
         'name': book_info['title'],
         'author': book_info['author'],
-        'availability': book_info['availability']
+        'available_list': available_list,
+        #'availability': book_info['availability']
     }
-    
     books.append(new_book)
     return jsonify(new_book)
 
