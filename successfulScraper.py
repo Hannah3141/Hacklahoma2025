@@ -52,7 +52,7 @@ def get_library_statuses(title):
         
         return library_status
     else:
-        return title_elem.contents #TODO: can we ask about this?
+        return title_elem.contents #TODO: can we ask the user about this?
 
 # Usage
 #url = "https://tccl.bibliocommons.com/v2/availability/S63C1803693"
