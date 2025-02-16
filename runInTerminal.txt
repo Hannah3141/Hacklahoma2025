@@ -1,3 +1,0 @@
-curl website+query
-grep title
-search for that nonsense you find in developer tools
