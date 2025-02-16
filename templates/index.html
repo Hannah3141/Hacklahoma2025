@@ -171,6 +171,8 @@ $(document).ready(function () {
 
         // Show the loading spinner
         $('#loading-spinner').show();
+        $('button[type=submit]').prop('disabled', true);
+
 
         let bookName = $('#book_name').val();
         $.ajax({
@@ -180,21 +182,24 @@ $(document).ready(function () {
             success: function (response) {
                 // Hide the loading spinner
                 $('#loading-spinner').hide();
+                $('button[type=submit]').prop('disabled', false);
 
-                let availabilityHtml = '';
+
+                let name = response.name || bookName;
+                let author = response.author || "Unknown";
+                let availabilityHtml = 'Not available';
+                
                 if (response.availability) {
                     availabilityHtml = '<ul>';
                     for (let [library, status] of Object.entries(response.availability)) {
                         availabilityHtml += `<li>${library}: ${status}</li>`;
                     }
                     availabilityHtml += '</ul>';
-                } else {
-                    availabilityHtml = 'Not available';
                 }
 
-                let newRow = `<tr id="book-${response.name}">
-                    <td>${response.name}</td>
-                    <td>${response.author}</td>
+                let newRow = `<tr id="book-${name}">
+                    <td>${name}</td>
+                    <td>${author}</td>
                     <td>${availabilityHtml}</td>
                     <td>
                         <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
@@ -207,7 +212,23 @@ $(document).ready(function () {
             error: function () {
                 // Hide the loading spinner on error
                 $('#loading-spinner').hide();
-                alert('There was an error adding the book.');
+
+                let name = bookName;
+                let author = "Unknown";
+                let availabilityHtml = 'Not available';
+                
+                let newRow = `<tr id="book-${name}">
+                    <td>${name}</td>
+                    <td>${author}</td>
+                    <td>${availabilityHtml}</td>
+                    <td>
+                        <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
+                        <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                    </td>
+                </tr>`;
+                $('#book-table-body').append(newRow);
+                $('#book_name').val('');
+                alert("The book was added, but we couldn't find its details. It has been added with unknown author and availability.");
             },
         });
     });
