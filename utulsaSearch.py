@@ -16,17 +16,35 @@ driver = webdriver.Edge(service=service, options=edge_options)
 
 def get_utulsa_statuses(title):
     # Load the page
-    driver.get(f"https://universityoftulsa.on.worldcat.org/search?queryString=ti{title[0]}")
+    driver.get(f"https://universityoftulsa.on.worldcat.org/search?queryString=bn:(0397001517)&subformat=Book%3A%3Abook_printbook")
 
     # Wait for the table to be present
-    title_element = WebDriverWait(driver, 20).until(
-        #TODO: it times out bc it can't find any of my elements; it found elements way at the top, so everything outside the parentheses works
-        EC.presence_of_element_located((By.CSS_SELECTOR, "class*='cssltr-1serysv'"))
+    box_element = WebDriverWait(driver, 20).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, ".MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-9.jss85.cssltr-3m06hh"))
     )
+    try:
+        first_element = box_element.find_element(By.CSS_SELECTOR, "li[data-testid='record-0']")
+        print(first_element)
+    except NoSuchElementException:
+        return "No results found"
+    except IndexError:
+        return "No results found"
+    try:
+        #title_element = first_element.find_element(By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-h6.MuiTypography-alignLeft.jss229.cssltr-k1mv2p")
+        title_element = first_element.find_element(By.CSS_SELECTOR, "span[data-testid='highlighted-term-container']")
+        if title_element.text == title:
+            print(title_element.text)
+            return True
+        else:
+            return title_element.text
+    except NoSuchElementException:
+        print("No such title element")
+
+    '''
     title = title_element.text
     print(f"The title of the first book is: {title}")
     driver.quit()
 '''  
     return library_status
 '''
-get_utulsa_statuses("The Hobbit")
+print(get_utulsa_statuses("Little Women"))
