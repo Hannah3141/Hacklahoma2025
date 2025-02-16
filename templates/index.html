@@ -134,7 +134,7 @@
                         <td>{{ book['name'] }}</td>
                         <td>{{ book['author'] }}</td>
                         <td>
-                            {% if book['availability'] and book['availability'] != "Not available" %}
+                            {% if book['availability'] %}
                                 <ul>
                                 {% for library, status in book['availability'].items() %}
                                     <li>{{ library }}: {{ status }}</li>
@@ -144,6 +144,7 @@
                                 Not available
                             {% endif %}
                         </td>
+                        
                         
                         <td>
                             <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
@@ -190,6 +191,7 @@ $(document).ready(function() {
             $('#book-table-body').append(newRow);
             $('#book_name').val('');
         },
+
 
         error: function() {
             alert("There was an error adding the book.");
