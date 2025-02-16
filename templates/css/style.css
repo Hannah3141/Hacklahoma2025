@@ -1,0 +1,81 @@
+/* This is the main CSS file for our website */
+
+/* Reset default margin and padding for all elements */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Set the default font family and size for the entire document */
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  /* Style the main heading */
+  h1 {
+    color: #333; /* Set the text color */
+    font-size: 2em; /* Make the font size twice the body text size */
+    margin-bottom: 20px; /* Add some space below the heading */
+  }
+  
+  /* Style paragraphs */
+  p {
+    margin-bottom: 15px; /* Add space between paragraphs */
+  }
+  
+  /* Style links */
+  a {
+    color: #0066cc; /* Set the link color */
+    text-decoration: none; /* Remove the default underline */
+  }
+  
+  /* Style links on hover */
+  a:hover {
+    text-decoration: underline; /* Add underline on hover */
+  }
+  
+  /* Create a simple container class */
+  .container {
+    max-width: 1200px; /* Set maximum width */
+    margin: 0 auto; /* Center the container */
+    padding: 20px; /* Add some inner spacing */
+  }
+  
+  /* Style a button class */
+  .button {
+    display: inline-block; /* Allow setting width and height */
+    padding: 10px 20px; /* Add some padding */
+    background-color: #4CAF50; /* Set background color */
+    color: white; /* Set text color */
+    border: none; /* Remove default border */
+    border-radius: 4px; /* Add rounded corners */
+    cursor: pointer; /* Change cursor to pointer on hover */
+  }
+  
+  /* Style button on hover */
+  .button:hover {
+    background-color: #45a049; /* Darken the background color */
+  }
+  
+  
+  .row {
+    display: flex; /* Use flexbox for layout */
+    flex-wrap: wrap; /* Allow items to wrap to next line */
+    margin: 0 -15px; /* Negative margin to counteract column padding */
+  }
+  
+  .column {
+    flex: 1; /* Make columns grow equally */
+    padding: 0 15px; /* Add some spacing between columns */
+  }
+  
+  /* Media query for smaller screens */
+  @media (max-width: 768px) {
+    .column {
+      flex: 100%; /* Make columns full width on small screens */
+    }
+  }
+  
