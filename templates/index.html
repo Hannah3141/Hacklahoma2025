@@ -33,10 +33,6 @@
             <label for="book_name" class="form-label">Book Name</label>
             <input type="text" class="form-control" id="book_name" required>
         </div>
-        <div class="mb-3">
-            <label for="genre" class="form-label">Genre</label>
-            <input type="text" class="form-control" id="genre" required>
-        </div>
         <button type="submit" class="btn btn-primary">Add Book</button>
     </form>
 
@@ -51,7 +47,7 @@
         <thead>
             <tr>
                 <th>Book Name</th>
-                <th>Genre</th>
+                <th>Author</th>
                 <th>Availability</th>
                 <th>Actions</th>
             </tr>
@@ -60,62 +56,73 @@
             {% for book in books %}
                 <tr id="book-{{ loop.index }}">
                     <td>{{ book['name'] }}</td>
-                    <td>{{ book['genre'] }}</td>
+                    <td>{{ book['author'] }}</td>
                     <td>{{ book['availability'] }}</td>
+                    </td>
                     <td>
                         <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
                         <button class="btn btn-danger btn-sm delete-btn">Delete</button>
-                        <button class="btn btn-warning btn-sm toggle-availability-btn">Toggle Availability</button>
                     </td>
                 </tr>
             {% endfor %}
         </tbody>
-        
     </table>
 </div>
 
 <script>
 $(document).ready(function() {
     $('#add-book-form').submit(function(e) {
-        e.preventDefault();
-
-        // Get form input values
-        let bookName = $('#book_name').val();
-        let genre = $('#genre').val();
-
-        // Send an AJAX request to add the book
-        $.ajax({
-            type: 'POST',
-            url: '/add_book',
-            data: {
-                book_name: bookName,
-                genre: genre
-            },
-            success: function(response) {
-                let newRow = `<tr id="book-${response.name}">
-                    <td>${response.name}</td>
-                    <td>${response.genre}</td>
-                    <td>${response.availability}</td>
-                    <td>
-                        <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
-                        <button class="btn btn-danger btn-sm delete-btn">Delete</button>
-                        <button class="btn btn-warning btn-sm toggle-availability-btn">Toggle Availability</button>
-                    </td>
-                </tr>`;
-                $('#book-table-body').append(newRow); 
-
-                // Clear the form fields
-                $('#book_name').val('');
-                $('#genre').val('');
-            },
-            error: function() {
-                alert("There was an error adding the book.");
-            }
-        });
+    e.preventDefault();
+    let bookName = $('#book_name').val();
+    $.ajax({
+        type: 'POST',
+        url: '/add_book',
+        data: { book_name: bookName },
+        success: function(response) {
+            let newRow = `<tr id="book-${response.name}">
+                <td>${response.name}</td>
+                <td>${response.author}</td>
+                <td>${response.availability}</td>
+                <td>
+                    <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
+                    <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                </td>
+            </tr>`;
+            $('#book-table-body').append(newRow);
+            $('#book_name').val('');
+        },
+        error: function() {
+            alert("There was an error adding the book.");
+        }
     });
+});
 
-    // Handle the Mark as Read button
-    $(document).on('click', '.mark-read-btn', function() {
+// Delete book
+$(document).on('click', '.delete-btn', function() {
+    let row = $(this).closest('tr');
+    let bookName = row.find('td').first().text();
+
+    $.ajax({
+        type: 'POST',
+        url: '/delete_book',
+        data: {
+            book_name: bookName
+        },
+        success: function(response) {
+            // Remove the book from the table immediately
+            row.remove();
+        },
+        error: function() {
+            alert("There was an error deleting the book.");
+        }
+    });
+});
+
+    // ... (rest of your JavaScript code remains the same)
+});
+
+// Handle the Mark as Read button
+$(document).on('click', '.mark-read-btn', function() {
         let row = $(this).closest('tr');
         
         // Add 'read-book' class and apply styles
@@ -171,26 +178,6 @@ $(document).ready(function() {
         });
     });
 
-    // Handle the Toggle Availability button
-    $(document).on('click', '.toggle-availability-btn', function() {
-        let row = $(this).closest('tr');
-        let bookName = row.find('td').first().text();
-        let availability = row.find('td').eq(2).text();
-        let newAvailability = (availability === 'Available') ? 'Unavailable' : 'Available';
-        
-        $.ajax({
-            type: 'POST',
-            url: '/toggle_availability',
-            data: { book_name: bookName, new_availability: newAvailability },
-            success: function(response) {
-                row.find('td').eq(2).text(newAvailability);
-            },
-            error: function() {
-                alert("There was an error updating availability.");
-            }
-        });
-    });
-
     // Handle the Sort Alphabetically button
     $('#sort-alphabetically').click(function() {
         let rows = $('#book-table-body tr').get();
@@ -219,11 +206,6 @@ $(document).ready(function() {
             $('#book-table-body').append(row);
         });
     });
-
-
-
-});
-
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
