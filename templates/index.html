@@ -57,7 +57,13 @@
                 <tr id="book-{{ loop.index }}">
                     <td>{{ book['name'] }}</td>
                     <td>{{ book['author'] }}</td>
-                    <td>{{ book['availability'] }}</td>
+                    <td>
+                        <ol>
+                            {% for library in availability %}
+                                <li>{{ library['availability'] }}</li>
+                            {% endfor %}
+                        </ol>
+                        <!--{{ book['availability'] }}--></td>
                     </td>
                     <td>
                         <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
