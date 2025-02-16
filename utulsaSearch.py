@@ -5,7 +5,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
-from selenium.common.exceptions import NoSuchElementException
 
 # Set up Edge options
 edge_options = EdgeOptions()
@@ -45,7 +44,7 @@ def get_utulsa_statuses(title):
     title = title_element.text
     print(f"The title of the first book is: {title}")
     driver.quit()
-
+'''  
     return library_status
 '''
 print(get_utulsa_statuses("Little Women"))

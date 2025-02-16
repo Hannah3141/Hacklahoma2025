@@ -28,34 +28,35 @@ def get_library_statuses(title):
     title_elem = first_result.find('span', class_='title-content')
     magic_number = first_result.find('a', attrs={'data-key': 'bib-title'})['data-test-id'][10:]
     
-    if title_elem.contents == title: #if in system
+    #if title_elem.text.strip() == title[0]:  # Compare with the first (and only) element of the title list
+
     # Load the page
-        driver.get(f"https://tccl.bibliocommons.com/v2/availability/{magic_number}")
+    driver.get(f"https://tccl.bibliocommons.com/v2/availability/{magic_number}")
 
-        # Wait for the table to be present
-        table = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "cp-table"))
-        )
+    # Wait for the table to be present
+    table = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "cp-table"))
+    )
 
-        # Extract the data
-        rows = table.find_elements(By.CLASS_NAME, "cp-table-row")
-        library_status = {}
+    # Extract the data
+    rows = table.find_elements(By.CLASS_NAME, "cp-table-row")
+    library_status = {}
 
-        for row in rows:
-            cells = row.find_elements(By.CLASS_NAME, "cp-table-cell")
-            if len(cells) >= 4:
-                library = cells[0].text.split('\n')[-1]
-                status = cells[3].text.split('\n')[-1]
-                library_status[library] = status
-        
-        driver.quit()
-        
-        return library_status
-    else:
-        return title_elem.contents #TODO: can we ask the user about this?
+    for row in rows:
+        cells = row.find_elements(By.CLASS_NAME, "cp-table-cell")
+        if len(cells) >= 4:
+            library = cells[0].text.split('\n')[-1]
+            status = cells[3].text.split('\n')[-1]
+            library_status[library] = status
+
+    driver.quit()
+
+    return library_status
+
+
 
 # Usage
 #url = "https://tccl.bibliocommons.com/v2/availability/S63C1803693"
-titles = ['To Kill A Mockingbird']
-results = get_library_statuses(titles)
-print(results)
+# titles = ['To Kill A Mockingbird']
+# results = get_library_statuses(titles)
+# print(results)
