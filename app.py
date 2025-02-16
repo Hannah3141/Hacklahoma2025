@@ -28,7 +28,8 @@ def fetch_book_availability(book_name):
 
         return {"title": title, "author": author, "availability": availability}
     else:
-        return {"title": "Book not found", "author": "N/A", "availability": "N/A"}
+        availability = "N/A"
+        return {"title": book_name, "author": "Unknown", "availability": availability}
 
 # Route to display the reading list
 @app.route('/')
