@@ -28,7 +28,8 @@ def get_library_statuses(title):
     title_elem = first_result.find('span', class_='title-content')
     magic_number = first_result.find('a', attrs={'data-key': 'bib-title'})['data-test-id'][10:]
     
-    if title_elem.contents == title: #if in system
+    if title_elem.text.strip() == title[0]:  # Compare with the first (and only) element of the title list
+
     # Load the page
         driver.get(f"https://tccl.bibliocommons.com/v2/availability/{magic_number}")
 
@@ -50,12 +51,14 @@ def get_library_statuses(title):
         
         driver.quit()
         
+        print(" LALALALALALA", library_status)
         return library_status
     else:
-        return title_elem.contents #TODO: can we ask about this?
+        return {}  # Return an empty dictionary if the book is not found
+
 
 # Usage
 #url = "https://tccl.bibliocommons.com/v2/availability/S63C1803693"
-titles = ['To Kill A Mockingbird']
-results = get_library_statuses(titles)
-print(results)
+# titles = ['To Kill A Mockingbird']
+# results = get_library_statuses(titles)
+# print(results)

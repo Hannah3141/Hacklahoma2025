@@ -28,16 +28,14 @@ def fetch_book_availability(book_name):
     if first_result:
         title_elem = first_result.find('span', class_='title-content')
         author_elem = first_result.find('a', class_='author-link')
-        availability_elem = first_result.find('span', class_='cp-availability-status')
 
         title = title_elem.text.strip() if title_elem else "Title not found"
         author = author_elem.text.strip() if author_elem else "Author not found"
-        availability = availability_elem.text.strip() if availability_elem else "Availability information not found"
 
-        return {"title": title, "author": author, "availability": availability}
+        return {"title": title, "author": author}
     else:
-        availability = "N/A"
-        return {"title": book_name, "author": "Unknown", "availability": availability}
+        return {"title": book_name, "author": "Unknown"}
+
 
 # Route to display the reading list
 @app.route('/')
@@ -48,18 +46,17 @@ def index():
 @app.route('/add_book', methods=['POST'])
 def add_book():
     book_name = request.form['book_name']
-    
     book_info = fetch_book_availability(book_name)
-    available_list = successfulScraper.get_library_statuses(book_name)
-    
+    available_list = successfulScraper.get_library_statuses([book_name])
+    print("LELELELELELE", available_list)
+
     new_book = {
         'name': book_info['title'],
         'author': book_info['author'],
-        'available_list': available_list,
-        #'availability': book_info['availability']
-    }
+        'availability': available_list if available_list else "Not available"    }
     books.append(new_book)
     return jsonify(new_book)
+
 
 # Route to delete a book
 @app.route('/delete_book', methods=['POST'])

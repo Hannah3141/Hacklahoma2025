@@ -134,13 +134,17 @@
                         <td>{{ book['name'] }}</td>
                         <td>{{ book['author'] }}</td>
                         <td>
-                            <ol>
-                                {% for library in availability %}
-                                    <li>{{ library['availability'] }}</li>
+                            {% if book['availability'] %}
+                                <ul>
+                                {% for library, status in book['availability'].items() %}
+                                    <li>{{ library }}: {{ status }}</li>
                                 {% endfor %}
-                            </ol>
-                            <!--{{ book['availability'] }}--></td>
+                                </ul>
+                            {% else %}
+                                Not available
+                            {% endif %}
                         </td>
+                        
                         <td>
                             <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
                             <button class="btn btn-danger btn-sm delete-btn">Delete</button>
@@ -148,6 +152,8 @@
                     </tr>
                 {% endfor %}
             </tbody>
+            
+            
         </table>
     </div>
 </div>
@@ -162,10 +168,20 @@ $(document).ready(function() {
         url: '/add_book',
         data: { book_name: bookName },
         success: function(response) {
+            let availabilityHtml = '';
+            if (response.availability) {
+                availabilityHtml = '<ul>';
+                for (let [library, status] of Object.entries(response.availability)) {
+                    availabilityHtml += `<li>${library}: ${status}</li>`;
+                }
+                availabilityHtml += '</ul>';
+            } else {
+                availabilityHtml = 'Not available';
+            }
             let newRow = `<tr id="book-${response.name}">
                 <td>${response.name}</td>
                 <td>${response.author}</td>
-                <td>${response.availability}</td>
+                <td>${availabilityHtml}</td>
                 <td>
                     <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
                     <button class="btn btn-danger btn-sm delete-btn">Delete</button>
@@ -174,11 +190,13 @@ $(document).ready(function() {
             $('#book-table-body').append(newRow);
             $('#book_name').val('');
         },
+
         error: function() {
             alert("There was an error adding the book.");
         }
     });
 });
+
 
 // Delete book
 $(document).on('click', '.delete-btn', function() {
