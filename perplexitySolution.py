@@ -2,10 +2,6 @@ from flask import Flask, render_template, request, jsonify
 import requests
 from bs4 import BeautifulSoup
 
-app = Flask(__name__)
-
-books = []
-
 def fetch_book_availability(book_name):
     url = f"https://tccl.bibliocommons.com/v2/search?query={book_name}&searchType=smart"
     response = requests.get(url)
@@ -22,9 +18,25 @@ def fetch_book_availability(book_name):
         author = author_elem.text.strip() if author_elem else "Author not found"
         availability = availability_elem.text.strip() if availability_elem else "Availability information not found"
         
-        return {"title": title, "author": author, "availability": availability}
+        print("title: %s, author: %s, availability: %s" % (title, author, availability))
     else:
-        return {"title": "Book not found", "author": "N/A", "availability": "N/A"}
+        print("title: %s, author: %s, availability: %s" % ("Book not found", "N/A", "N/A"))
+
+def fetch_utulsa_availability(book_name):
+    url = "https://universityoftulsa.on.worldcat.org/search?queryString=ti{book_name}"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    first_result = soup.find('span', attrs={"data-testid" : "highlighted-term-container"})
+    print(first_result)
+
+
+fetch_utulsa_availability("To Kill a Mockingbird")
+
+'''
+app = Flask(__name__)
+
+books = []
 
 @app.route('/')
 def index():
@@ -49,3 +61,4 @@ def add_book():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    '''
