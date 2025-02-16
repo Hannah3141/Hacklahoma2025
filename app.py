@@ -1,11 +1,19 @@
 from flask import Flask, render_template, request, jsonify
 import requests
+#from google import generativeai as genai
+import os
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
 # Sample data: Temporary list for books and their availability
 books = []
+
+# Configures the Gemini API
+#genai.configure(api_key='AIzaSyCJhZA-00AjixPDrf3DZ3MYLg1H1VLSUqg')
+
+# using 1.5 bc its free yay
+#model = genai.GenerativeModel('gemini-1.5-flash')
 
 # Route to get book availability
 @app.route('/toggle_availability', methods=['POST'])
@@ -58,6 +66,12 @@ def delete_book():
     books = [book for book in books if book['name'] != book_name]
 
     return jsonify({'status': 'deleted', 'book_name': book_name})
+
+'''@app.route('/get_book_recs', methods=['POST'])
+def get_book_recs(user_books):
+    prompt = f"Based on the following books: {user_books}, recommend 3 similar books with their titles and authors."
+    response = model.generate_content(prompt)
+    return response.text'''
 
 # Route to mark a book as read
 @app.route('/mark_read', methods=['POST'])
