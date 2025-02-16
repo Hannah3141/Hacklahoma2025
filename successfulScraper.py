@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
-def get_library_statuses(url):
+def get_library_statuses(url): 
     # Set up Edge options
     edge_options = EdgeOptions()
     edge_options.add_argument("--headless")  # Run in headless mode
