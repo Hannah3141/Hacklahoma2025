@@ -51,6 +51,8 @@ def get_library_statuses(title):
         driver.quit()
         
         return library_status
+    else:
+        return title_elem.contents #TODO: can we ask about this?
 
 def get_utulsa_statuses(title):
     response = requests.get(
