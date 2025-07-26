@@ -14,7 +14,8 @@ edge_options = EdgeOptions()
 edge_options.add_argument("--headless")  # Run in headless mode
 
 # Set up the Edge WebDriver using webdriver-manager
-service = EdgeService(EdgeChromiumDriverManager().install())
+# I've got no idea how to add this on GitHub, but right click EdgeChromiumDriverManager, click Go To Definition, and change the urls to "https://msedgedriver.microsoft.com" and "https://msedgedriver.microsoft.com/LATEST_RELEASE" instead of the azure ones.
+service = EdgeService(EdgeChromiumDriverManager().install()) 
 driver = webdriver.Edge(service=service, options=edge_options)
 
 def get_library_statuses(title):
@@ -49,7 +50,7 @@ def get_library_statuses(title):
             status = cells[3].text.split('\n')[-1]
             library_status[library] = status
 
-    driver.quit()
+    # driver.quit()
 
     return library_status
 
