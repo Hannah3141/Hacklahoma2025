@@ -10,7 +10,7 @@ books = []
 
 # Route to get book availability
 @app.route('/toggle_availability', methods=['POST'])
-def fetch_book_availability():
+def fetch_TCCL_availability():
     book_name = request.form['book_name']
     url = f"https://tccl.bibliocommons.com/v2/search?query={book_name}&searchType=smart&f_FORMAT=BK"
     response = requests.get(url)
@@ -28,7 +28,7 @@ def fetch_book_availability():
         return {"title": title, "author": author}
     else:
         return {"title": book_name, "author": "Unknown"}
-
+ 
 # Route to display the reading list
 @app.route('/')
 def index():
@@ -38,7 +38,7 @@ def index():
 @app.route('/add_book', methods=['POST'])
 def add_book():
     book_name = request.form['book_name']
-    book_info = fetch_book_availability()
+    book_info = fetch_TCCL_availability()
     available_list = successfulScraper.get_library_statuses(book_name)
 
     new_book = {

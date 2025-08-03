@@ -154,6 +154,7 @@
                         <td>
                             <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
                             <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                            <button class="btn btn-warning btn-sm edit-btn">Edit</button>
                         </td>
                     </tr>
                 {% endfor %}
@@ -204,6 +205,7 @@ $(document).ready(function () {
                     <td>
                         <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
                         <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                        <button class="btn btn-warning btn-sm edit-btn">Edit</button>
                     </td>
                 </tr>`;
                 $('#book-table-body').append(newRow);
@@ -225,6 +227,7 @@ $(document).ready(function () {
                     <td>
                         <button class="btn btn-success btn-sm mark-read-btn">Mark as Read</button>
                         <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                        <button class="btn btn-warning btn-sm edit-btn">Edit</button>
                     </td>
                 </tr>`;
                 $('#book-table-body').append(newRow);
@@ -344,7 +347,22 @@ $(document).on('click', '.mark-read-btn', function() {
         });
     });
 
+// Handle the Edit button -- this doesn't actually edit the book in the database, it just updates the UI
+$(document).on('click', '.edit-btn', function() {
+    let row = $(this).closest('tr');
+    let bookName = row.find('td').first().text();
+    let author = row.find('td').eq(1).text();
     
+    // Prompt for new book name and author
+    let newBookName = prompt("Edit Book Name:", bookName);
+    let newAuthor = prompt("Edit Author Name:", author);
+    
+    if (newBookName && newAuthor) {
+        // Update the row with new values
+        row.find('td').first().text(newBookName);
+        row.find('td').eq(1).text(newAuthor);
+    }
+});   
     
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

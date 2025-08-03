@@ -50,7 +50,7 @@ def get_library_statuses(title):
             status = cells[3].text.split('\n')[-1]
             library_status[library] = status
 
-    # driver.quit()
+    driver.quit()
 
     return library_status
 
