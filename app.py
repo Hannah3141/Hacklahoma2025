@@ -37,8 +37,8 @@ def index():
 # Route to add a new book
 @app.route('/add_book', methods=['POST'])
 def add_book():
-    book_name = request.form['book_name']
-    book_info = fetch_TCCL_availability()
+    book_name = request.form['book_name'] # this is the one the user inputs
+    book_info = fetch_TCCL_availability() # this is the one actually listed in the catalog
     available_list = successfulScraper.get_library_statuses(book_name)
 
     new_book = {
