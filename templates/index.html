@@ -188,7 +188,7 @@ $(document).ready(function () {
 
                 let name = response.name || bookName;
                 let author = response.author || "Unknown";
-                let availabilityHtml = 'Not available';
+                let availabilityHtml = 'Error fetching availability';
                 
                 if (response.availability) {
                     availabilityHtml = '<ul>';

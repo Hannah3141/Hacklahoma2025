@@ -5,18 +5,30 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.firefox.service import Service as FirefoxService
 import requests
 import json
 from bs4 import BeautifulSoup
 
-# Set up Edge options
-edge_options = EdgeOptions()
-edge_options.add_argument("--headless")  # Run in headless mode
+try:
+    # Set up Edge options
+    edge_options = EdgeOptions()
+    edge_options.add_argument("--headless")  # Run in headless mode
 
-# Set up the Edge WebDriver using webdriver-manager
-# I've got no idea how to add this on GitHub, but right click EdgeChromiumDriverManager, click Go To Definition, and change the urls to "https://msedgedriver.microsoft.com" and "https://msedgedriver.microsoft.com/LATEST_RELEASE" instead of the azure ones.
-service = EdgeService(EdgeChromiumDriverManager().install()) 
-SelDriver = webdriver.Edge(service=service, options=edge_options)
+    # Set up the Edge WebDriver using webdriver-manager
+    # I've got no idea how to add this on GitHub, but right click EdgeChromiumDriverManager, click Go To Definition, and change the urls to "https://msedgedriver.microsoft.com" and "https://msedgedriver.microsoft.com/LATEST_RELEASE" instead of the azure ones.
+    EdgService = EdgeService(EdgeChromiumDriverManager().install()) #Misspelled for a reason
+    EdgeDriver = webdriver.Edge(service=EdgService, options=edge_options)
+except Exception:
+    print("Edge WebDriver setup failed. Falling back to Firefox.")
+    # Set up Firefox options
+    firefox_options = webdriver.FirefoxOptions()
+    firefox_options.add_argument("--headless")  # Run in headless mode
+    # Set up the Firefox WebDriver
+    FireService = FirefoxService(executable_path=webdriver.Firefox(executable_path="geckodriver")) #idk, ask copilot
+    FireDriver = webdriver.Firefox(options=firefox_options)
+
 
 def get_library_statuses(title):
     response = requests.get(
@@ -53,25 +65,26 @@ def get_library_statuses(title):
     SelDriver.get(availability_url)
     '''
     library_status = {}
-    #try:
-    #table = WebDriverWait(SelDriver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "cp-manifestation-list"))
-    table = soup.find('div', class_='cp-manifestation-list')
-    #table = SelDriver.find_element(By.CLASS_NAME, "cp-manifestation-list")
-    
-    rows = table.find_all('div', class_="manifestation-item cp-manifestation-list-item row")
-    for row in rows:
-            #try:
-                status_elem = row.find('span', class_="cp-availability-status")
-                print(status_elem.contents) #Little Women works, Black Beauty does not
-                status = status_elem.contents 
-                format = row.find('span', class_="cp-screen-reader-message").contents
-                print(format)
-            #except Exception:
-            #    status = "Unknown"
-                library_status[format[0]] = status[0]
-    #except Exception:
-    #    library_status[format_name] = "Unavailable"
-
+    try:
+        table = soup.find('div', class_='cp-manifestation-list')
+        
+        rows = table.find_all('div', class_="manifestation-item cp-manifestation-list-item row")
+        for row in rows:
+                try:
+                    format_label = row.find('span', class_="cp-screen-reader-message").contents
+                    format = format_label[0].split(',')  # Get the first word, which is the format
+                except Exception:
+                     format = "Error retrieving format"
+                try:
+                    status_elem = row.find('span', class_="cp-availability-status") #Little Women works, Black Beauty does not
+                    status = status_elem.contents 
+                except Exception:
+                    status = "Unknown"
+                if format[0] == 'Book' or format[0] == 'eBook' or format[0] == 'eAudiobook' or format[0] == 'Graphic Novel':
+                    if format[0] not in library_status or library_status[format[0]] == 'All copies in use':
+                        library_status[format[0]] = status[0] 
+    except Exception:
+        library_status[format[0]] = "Error retrieving status"
     return library_status
 
 # Terminal display
