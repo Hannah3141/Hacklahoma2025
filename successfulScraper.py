@@ -20,17 +20,22 @@ SelDriver = webdriver.Edge(service=service, options=edge_options)
 
 def get_library_statuses(title):
     response = requests.get(
-        f"https://tccl.bibliocommons.com/v2/search?query={title[0]}&searchType=title&f_FORMAT=BK"
+        f"https://tccl.bibliocommons.com/v2/search?query={title}&searchType=title"
     )
     soup = BeautifulSoup(response.text, 'html.parser')
-    first_result = soup.find('div', class_='cp-search-result-item-content')
+    file = open("debug.html", "w", encoding="utf-8")
+    file.write(soup.prettify())
+    file.close()
+    first_result = soup.find('div', class_='cp-search-result-item-content') 
     if first_result == None:
         return False
-    title_elem = first_result.find('span', class_='title-content')
-    magic_number = first_result.find('a', attrs={'data-key': 'bib-title'})['data-test-id'][10:]
+    title_section = first_result.find('h2', class_='cp-title') 
+    title_elem = title_section.find('span', class_='title-content') 
+    magic_number = first_result.find('a', attrs={'data-key': 'bib-title'})['href'] 
     
     #if title_elem.text.strip() == title[0]:  # Compare with the first (and only) element of the title list
 
+    '''
     # Only process the first result's formats (all formats, not just physical books)
     format_links = first_result.find_all('a', attrs={'data-key': 'bib-title'})
     if not format_links:
@@ -41,46 +46,36 @@ def get_library_statuses(title):
     if not link.has_attr('href'):
         return False
     format_name = link.text.strip() # this is not the format, idk what it is copilot
-    availability_url = "https://tccl.bibliocommons.com" + link['href']
+    availability_url = "https://tccl.bibliocommons.com" + magic_number #link['href']
 
-    library_status = {}
+    
 
     SelDriver.get(availability_url)
-    try:
-        table = WebDriverWait(SelDriver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "cp-manifestation-list"))
-        )
-        rows = table.find_elements(By.CLASS_NAME, "manifestation-item")
-        for row in rows:
-            try:
-                status_elem = row.find_element(By.CLASS_NAME, "cp-availability-status")
-                status = status_elem.text.strip()
-            except Exception:
-                status = "Unknown"
-            library_status[format_name] = status
-    except Exception:
-        library_status[format_name] = "Unavailable"
-
-    return library_status
-
-
-     # Extract the data
-    rows = table.find_elements(By.CLASS_NAME, "manifestation-item cp-manifestation-list-item row")
+    '''
     library_status = {}
-
+    #try:
+    #table = WebDriverWait(SelDriver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "cp-manifestation-list"))
+    table = soup.find('div', class_='cp-manifestation-list')
+    #table = SelDriver.find_element(By.CLASS_NAME, "cp-manifestation-list")
+    
+    rows = table.find_all('div', class_="manifestation-item cp-manifestation-list-item row")
     for row in rows:
-        format = row.find_element(By.CLASS_NAME, "cp-screen-reader-message")
-        status = row.find_element(By.CLASS_NAME, "cp-availability-status available")
-        library_status[format] = status
-
-    #SelDriver.quit() would quit after the first book?
+            #try:
+                status_elem = row.find('span', class_="cp-availability-status")
+                print(status_elem.contents) #Little Women works, Black Beauty does not
+                status = status_elem.contents 
+                format = row.find('span', class_="cp-screen-reader-message").contents
+                print(format)
+            #except Exception:
+            #    status = "Unknown"
+                library_status[format[0]] = status[0]
+    #except Exception:
+    #    library_status[format_name] = "Unavailable"
 
     return library_status
 
-
-
-# Usage
-#url = "https://tccl.bibliocommons.com/v2/availability/S63C1803693"
+# Terminal display
+# url = "https://tccl.bibliocommons.com/v2/availability/S63C1803693"
 # titles = ['To Kill A Mockingbird']
 # results = get_library_statuses(titles)
 # print(results)

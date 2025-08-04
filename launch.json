@@ -1,8 +1,0 @@
-//this doesn't work, something about run and debug menu on left sidebar
-{
-    "name": "Python: Current File (Integrated Terminal)",
-    "type": "python",
-    "request": "launch",
-    "program": "${workspaceFolder}/app.py",
-    "console": "integratedTerminal"
-}
