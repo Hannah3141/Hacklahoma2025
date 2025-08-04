@@ -18,16 +18,16 @@ try:
 
     # Set up the Edge WebDriver using webdriver-manager
     # I've got no idea how to add this on GitHub, but right click EdgeChromiumDriverManager, click Go To Definition, and change the urls to "https://msedgedriver.microsoft.com" and "https://msedgedriver.microsoft.com/LATEST_RELEASE" instead of the azure ones.
-    EdgService = EdgeService(EdgeChromiumDriverManager().install()) #Misspelled for a reason
-    EdgeDriver = webdriver.Edge(service=EdgService, options=edge_options)
+    service = EdgeService(EdgeChromiumDriverManager().install()) 
+    driver = webdriver.Edge(service=service, options=edge_options)
 except Exception:
     print("Edge WebDriver setup failed. Falling back to Firefox.")
     # Set up Firefox options
     firefox_options = webdriver.FirefoxOptions()
     firefox_options.add_argument("--headless")  # Run in headless mode
     # Set up the Firefox WebDriver
-    FireService = FirefoxService(executable_path=webdriver.Firefox(executable_path="geckodriver")) #idk, ask copilot
-    FireDriver = webdriver.Firefox(options=firefox_options)
+    service = webdriver.FirefoxService() #i don't think this actually works, idk what to do
+    driver = webdriver.Firefox(options=firefox_options)
 
 
 def get_library_statuses(title):
@@ -35,7 +35,7 @@ def get_library_statuses(title):
         f"https://tccl.bibliocommons.com/v2/search?query={title}&searchType=title"
     )
     soup = BeautifulSoup(response.text, 'html.parser')
-    file = open("debug.html", "w", encoding="utf-8")
+    file = open("tccl2.html", "w", encoding="utf-8")
     file.write(soup.prettify())
     file.close()
     first_result = soup.find('div', class_='cp-search-result-item-content') 
@@ -47,23 +47,6 @@ def get_library_statuses(title):
     
     #if title_elem.text.strip() == title[0]:  # Compare with the first (and only) element of the title list
 
-    '''
-    # Only process the first result's formats (all formats, not just physical books)
-    format_links = first_result.find_all('a', attrs={'data-key': 'bib-title'})
-    if not format_links:
-        return False
-
-    # Only use the first format link (corresponds to the first result)
-    link = format_links[0]
-    if not link.has_attr('href'):
-        return False
-    format_name = link.text.strip() # this is not the format, idk what it is copilot
-    availability_url = "https://tccl.bibliocommons.com" + magic_number #link['href']
-
-    
-
-    SelDriver.get(availability_url)
-    '''
     library_status = {}
     try:
         table = soup.find('div', class_='cp-manifestation-list')
