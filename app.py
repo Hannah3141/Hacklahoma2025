@@ -17,14 +17,23 @@ import successfulScraper
 
 app = Flask(__name__)
 
-# Set up Edge options
-edge_options = EdgeOptions()
-edge_options.add_argument("--headless")  # Run in headless mode
+try:
+    # Set up Edge options
+    edge_options = EdgeOptions()
+    edge_options.add_argument("--headless")  # Run in headless mode
 
-# Set up the Edge WebDriver using webdriver-manager
-# I've got no idea how to add this on GitHub, but right click EdgeChromiumDriverManager, click Go To Definition, and change the urls to "https://msedgedriver.microsoft.com" and "https://msedgedriver.microsoft.com/LATEST_RELEASE" instead of the azure ones.
-service = EdgeService(EdgeChromiumDriverManager().install()) 
-driver = webdriver.Edge(service=service, options=edge_options)
+    # Set up the Edge WebDriver using webdriver-manager
+    # I've got no idea how to add this on GitHub, but right click EdgeChromiumDriverManager, click Go To Definition, and change the urls to "https://msedgedriver.microsoft.com" and "https://msedgedriver.microsoft.com/LATEST_RELEASE" instead of the azure ones.
+    service = EdgeService(EdgeChromiumDriverManager().install()) 
+    driver = webdriver.Edge(service=service, options=edge_options)
+except Exception:
+    print("Edge WebDriver setup failed. Falling back to Firefox.")
+    # Set up Firefox options
+    firefox_options = webdriver.FirefoxOptions()
+    firefox_options.add_argument("--headless")  # Run in headless mode
+    # Set up the Firefox WebDriver
+    service = webdriver.FirefoxService() #i don't think this actually works, idk what to do
+    driver = webdriver.Firefox(options=firefox_options)
 
 # Sample data: Temporary list for books and their availability
 books = []
@@ -58,33 +67,9 @@ def fetch_TCCL_results():
 def fetch_Monarch_results():
     book_name = request.form['book_name']
     url = f"https://flwl-monarch.search.monarchcatalog.org/search?query={book_name}&searchType=title&pageSize=10&materialTypeIds=41,36,1&pageNum=0"
-    #BeautifulSoup version
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-    
-    file = open("monarch1.html", "w", encoding="utf-8")
-    file.write(soup.prettify())
-    file.close()
-
-    '''first_result = soup.find('div', class_='card py-4 px-4')
-    
-    if first_result:
-        title_elem = first_result.find('a', class_='notranslate ng-star-inserted')
-        author_elem = first_result.find('span', class_='notranslate')
-
-        title = title_elem.text.strip() if title_elem else "Title not found"
-        author = author_elem.text.strip() if author_elem else "Author not found"
-
-        return {"title": title, "author": author}
-    else:
-        return {"title": book_name, "author": "Unknown"}
-    '''
     
     # Selenium version
     response = driver.get(url)
-    file = open("monarch1.html", "w", encoding="utf-8") #idk which encoding
-    file.write(driver.page_source)
-    file.close()
     
     first_result = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.TAG_NAME, "app-entities")) #what do you want from me???
@@ -93,6 +78,21 @@ def fetch_Monarch_results():
     file = open("monarch1.html", "w", encoding="utf-8") #idk which encoding
     file.write(driver.page_source)
     file.close()
+
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    #soup = BeautifulSoup(response.content, 'html.parser')
+    first_result = soup.find('div', class_='card py-4 px-4') #1164
+    
+    if first_result:
+        title_elem = first_result.find('a', class_='notranslate ng-star-inserted') #1164
+        author_elem = first_result.find('span', class_='notranslate')
+
+        title = title_elem.text.strip() if title_elem else "Title not found"
+        author = author_elem.text.strip() if author_elem else "Author not found"
+
+        return {"title": title, "author": author}
+    else:
+        return {"title": book_name, "author": "Unknown"}
  
 # Route to display the reading list
 @app.route('/')
@@ -102,12 +102,10 @@ def index():
 # Route to add a new book
 @app.route('/add_book', methods=['POST'])
 def add_book():
+    """
     TCCL_info = fetch_TCCL_results() # this is the one actually listed in the catalog
     available_list = successfulScraper.get_library_statuses(TCCL_info['title'])
 
-    monarch_info = fetch_Monarch_results() # this is the one that Monarch returns
-    
-    
     new_book = {
         'name': TCCL_info['title'],
         'author': TCCL_info['author'],
@@ -115,6 +113,17 @@ def add_book():
     }
     books.append(new_book)
     return jsonify(new_book)
+    """
+    monarch_info = fetch_Monarch_results() # this is the one that Monarch returns
+    available_list_monarch = successfulScraper.get_library2_statuses(monarch_info['title'])
+
+    new_book_monarch = {
+        'name': monarch_info['title'],
+        'author': monarch_info['author'],
+        'availability': available_list_monarch if available_list_monarch else None
+    }
+    books.append(new_book_monarch)
+    return jsonify(new_book_monarch)
 
 # Route to delete a book
 @app.route('/delete_book', methods=['POST'])

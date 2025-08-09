@@ -29,7 +29,6 @@ except Exception:
     service = webdriver.FirefoxService() #i don't think this actually works, idk what to do
     driver = webdriver.Firefox(options=firefox_options)
 
-
 def get_library_statuses(title):
     response = requests.get(
         f"https://tccl.bibliocommons.com/v2/search?query={title}&searchType=title"
@@ -38,6 +37,7 @@ def get_library_statuses(title):
     file = open("tccl2.html", "w", encoding="utf-8")
     file.write(soup.prettify())
     file.close()
+
     first_result = soup.find('div', class_='cp-search-result-item-content') 
     if first_result == None:
         return False
@@ -70,6 +70,37 @@ def get_library_statuses(title):
         library_status[format[0]] = "Error retrieving status"
     return library_status
 
+def get_library2_statuses(title):
+    response = driver.get(
+        f"https://flwl-monarch.search.monarchcatalog.org/search?query={title}&searchType=title&pageSize=10&materialTypeIds=41,36,1&pageNum=0"
+    )
+    file = open("monarch2.html", "w", encoding="utf-8")
+    file.write(driver.page_source)
+    file.close()
+
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    first_result = soup.find('div', class_='card py-4 px-4')
+    if first_result == None:
+        return False
+    title_elem = first_result.find('a', class_='notranslate ng-star-inserted')
+    #magic_number = first_result.find('a', attrs={'data-key': 'bib-title'})['href'] 
+
+    library_status = {}
+    try:
+        header = first_result.find('drag-scroll')
+        formats = header.find_all('a', class_='tab-label nav-link nav-item ng-star-inserted') + header.find_all('a', class_='tab-label nav-link nav-item active ng-star-inserted')
+        for header in formats:
+            status_elem = header.find('div', class_="status d-inline-flex ng-star-inserted")
+            variated_status_elem = status_elem.find('span')
+            status = variated_status_elem.contents if status_elem else "Unknown"
+            format_elem = header.find('div', class_="label ng-star-inserted")
+            format = format_elem.text.strip() if format_elem else "Unknown" 
+            if format[0] == 'Book' or format[0] == 'eBook' or format[0] == 'eAudiobook' or format[0] == 'Graphic Novel':
+                library_status[format] = status
+    except Exception:
+        library_status[format] = "Error retrieving status"
+    
+    return library_status
 # Terminal display
 # url = "https://tccl.bibliocommons.com/v2/availability/S63C1803693"
 # titles = ['To Kill A Mockingbird']
